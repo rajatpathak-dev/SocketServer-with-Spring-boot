@@ -1,5 +1,6 @@
 package com.pickmeapp.pickmeappsocketservice.service;
 
+import com.pickmeapp.pickmeappsocketservice.dto.SaveDriverLocationRequestDto;
 import com.pickmeapp.pickmeappsocketservice.dto.UpdateBookingRequestDto;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.support.SendResult;
@@ -15,7 +16,7 @@ public class KafkaMessagePublisher {
         this.template = template;
     }
 
-    public void sendEventsToTopic(UpdateBookingRequestDto updateBookingResponseDto) {
+    public void sendUpdatedBookingRequest(UpdateBookingRequestDto updateBookingResponseDto) {
         try {
             CompletableFuture<SendResult<String, Object>> future = template.send("PickMeApp-SocketPublisher", updateBookingResponseDto);
             future.whenComplete((result, ex) -> {
@@ -25,6 +26,23 @@ public class KafkaMessagePublisher {
                 } else {
                     System.out.println("Unable to send message=[" +
                             updateBookingResponseDto.toString() + "] due to : " + ex.getMessage());
+                }
+            });
+        } catch (Exception e){
+            System.out.println("Error :"+e.getMessage());
+        }
+    }
+
+    public void sendSaveDriverLocation(SaveDriverLocationRequestDto saveDriverLocationRequestDto) {
+        try {
+            CompletableFuture<SendResult<String, Object>> future = template.send("PickMeApp-SaveDriverLoc", saveDriverLocationRequestDto);
+            future.whenComplete((result, ex) -> {
+                if (ex == null) {
+                    System.out.println("Send Message=[" + saveDriverLocationRequestDto.toString() +
+                            "] with offset=[" + result.getRecordMetadata().offset() + "]");
+                } else {
+                    System.out.println("Unable to send message=[" +
+                           saveDriverLocationRequestDto.toString() + "] due to : " + ex.getMessage());
                 }
             });
         } catch (Exception e){

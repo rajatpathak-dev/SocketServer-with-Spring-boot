@@ -1,18 +1,13 @@
 package com.pickmeapp.pickmeappsocketservice.controller;
 
-import com.pickmeapp.pickmeappsocketservice.dto.RideRequestDto;
-import com.pickmeapp.pickmeappsocketservice.dto.RideResponseDto;
-import com.pickmeapp.pickmeappsocketservice.dto.UpdateBookingRequestDto;
-import com.pickmeapp.pickmeappsocketservice.dto.UpdateBookingResponseDto;
+import com.pickmeapp.pickmeappsocketservice.dto.*;
 import com.pickmeapp.pickmeappsocketservice.service.KafkaMessagePublisher;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.client.RestTemplate;
 
 import java.util.Optional;
 
@@ -52,8 +47,19 @@ public class DriveRequestController {
                                                           .bookingId(rideResponseDto.getBookingId())
                                                           .build();
 //        ResponseEntity<UpdateBookingResponseDto> result = restTemplate.postForEntity("http://localhost:8000/api/v1/booking/"+rideResponseDto.getBookingId(),updateBookingRequestDto, UpdateBookingResponseDto.class);
-        kafkaMessagePublisher.sendEventsToTopic(updateBookingRequestDto);
+        kafkaMessagePublisher.sendUpdatedBookingRequest(updateBookingRequestDto);
 
+    }
+
+    @MessageMapping("/driverlocation")
+    public synchronized void driverLocationHandler(SaveDriverLocationRequestDto saveDriverLocationRequestDto){
+        System.out.println("inside driver location saver");
+        kafkaMessagePublisher.sendSaveDriverLocation(saveDriverLocationRequestDto);
+    }
+    
+    @GetMapping("/hello")
+    public String getHello(){
+        return "Hello to test bind mount in socket service";
     }
 
 
